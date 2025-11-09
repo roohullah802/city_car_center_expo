@@ -199,7 +199,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 15,
-    backgroundColor:"white"
+    backgroundColor:"white",
+    paddingTop: Platform.OS === 'android' ? 20 : 30
   },
   header: {
     flexDirection: 'row',
@@ -208,12 +209,12 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 60,
     paddingHorizontal: 2,
-    paddingTop: Platform.OS === 'ios' ? 50 : 20,
+    paddingTop: Platform.OS === 'ios' ? 44 : 20,
   },
   headerText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1F305E',
+    color: '#3f3f3fff',
   },
   iconBtn: {
     backgroundColor: 'white',
@@ -234,7 +235,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     fontSize: 14,
     fontFamily: 'medium',
-    color: '#1F305E',
+    color: '#3f3f3fff',
   },
   cardPressed: {
     opacity: 0.9,
@@ -266,13 +267,13 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F305E',
+    color: 'black',
     fontFamily: 'bold',
   },
   price: {
     fontSize: 10,
     fontWeight: '600',
-    color: '#1F305E',
+    color: '#3f3f3fff',
     fontFamily: 'bold',
   },
   rating: {
@@ -281,7 +282,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     fontSize: 7,
-    color: '#1F305E',
+    color: '#3f3f3fff',
     fontFamily: 'demiBold',
     marginLeft: 4,
   },

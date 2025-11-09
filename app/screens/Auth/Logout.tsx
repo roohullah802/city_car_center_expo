@@ -84,7 +84,7 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ visible, onClose }) => {
               onPress={handleLogout}
             >
               {loading ? (
-                <ActivityIndicator size={"small"} color={"#fff"} />
+                <ActivityIndicator size={"small"} color={"#73C2FB"} />
               ) : (
                 <Text style={styles.enableText}>{"Logout"}</Text>
               )}
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: width * 0.05,
-    color: "#1F305E",
+    color: "#3f3f3fff",
     marginBottom: width * 0.02,
     fontFamily: 'bold',
   },

@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Platform, StyleSheet } from "react-native";
-import { Image, Text, TouchableOpacity } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  StyleSheet,
+  Image,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import { View } from "react-native-animatable";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
 import { useSSO, useAuth } from "@clerk/clerk-expo";
 import { showToast } from "@/folder/toastService";
 import { useDispatch } from "react-redux";
-import {
-  setToken,
-} from "@/redux.toolkit/slices/userSlice";
+import { setToken } from "@/redux.toolkit/slices/userSlice";
 import { router } from "expo-router";
 
 const useWarmUpBrowser = () => {
@@ -48,14 +52,13 @@ export default function SignInWithGoogle() {
         if (!token) throw new Error("Token not received");
 
         dispatch(setToken(token));
-        router.push("/(tabs)/Home")
+        router.push("/(tabs)/Home");
       } else {
         showToast("Google sign in failed!");
       }
     } catch (error) {
       setLoading(false);
       console.log(error);
-      
     } finally {
       setLoading(false);
     }
@@ -77,7 +80,7 @@ export default function SignInWithGoogle() {
       <View style={styles.labelWrap}>
         <Text style={styles.buttonLabel}>
           {loading ? (
-            <ActivityIndicator size={"small"} />
+            <ActivityIndicator size={"small"} color={'#73C2FB'} />
           ) : (
             "Sign-in with google"
           )}

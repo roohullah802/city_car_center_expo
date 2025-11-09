@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  SafeAreaView,
   View,
   Text,
   StyleSheet,
@@ -10,6 +9,7 @@ import {
   useWindowDimensions,
   Platform,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context'
 import { useGetAllLeasesQuery } from '../../../redux.toolkit/rtk/leaseApis';
 import { router } from 'expo-router';
 
@@ -205,13 +205,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 12 : 0,
+    paddingTop: Platform.OS === 'android' ? 20 : 30,
   },
   header: { marginBottom: 20 },
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1F305E',
+    color: '#3f3f3fff',
     fontFamily: 'bold',
   },
   subtitle: { fontSize: 14, color: '#6b7280', marginTop: 4 },
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
   unitText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1F305E',
+    color: '#3f3f3fff',
     fontFamily: 'bold',
   },
   tenantText: {
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     fontFamily: 'demiBold',
   },
   metaCol: { alignItems: 'flex-end' },
-  rentText: { fontWeight: '700', fontSize: 15, color: '#1F305E' },
+  rentText: { fontWeight: '700', fontSize: 15, color: '#3f3f3fff' },
   statusPill: {
     marginTop: 6,
     paddingHorizontal: 10,
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
 
   cardBody: { borderTopWidth: 1, borderTopColor: '#f3f4f6', paddingTop: 8 },
   dateRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  small: { fontSize: 13, color: '#1F305E', fontFamily: 'demiBold' },
+  small: { fontSize: 13, color: '#3f3f3fff', fontFamily: 'demiBold' },
   expandedArea: { marginTop: 12 },
   notes: { fontSize: 13, color: '#374151', marginBottom: 12 },
 

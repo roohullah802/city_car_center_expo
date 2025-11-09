@@ -1,7 +1,7 @@
 
-import { SplashScreen, Stack } from "expo-router";
+import {  SplashScreen, Stack } from "expo-router";
 import { Provider } from "react-redux";
-import {  store } from "../redux.toolkit/store";
+import { store } from "../redux.toolkit/store";
 import "react-native-reanimated";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ClerkProvider } from "@clerk/clerk-expo";
@@ -18,8 +18,6 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
-
-
 
   const [fontsLoaded] = useFonts({
     regular: require("../assests/fonts/TTHoves-Regular.ttf"),
@@ -40,7 +38,6 @@ export default function RootLayout() {
     return null;
   }
 
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ClerkProvider publishableKey="pk_test_Ym9sZC1kdWNrbGluZy03MC5jbGVyay5hY2NvdW50cy5kZXYk">
@@ -50,7 +47,6 @@ export default function RootLayout() {
               <StripeProvider publishableKey="pk_test_51Re3kqIetrHxrdQ8R3S84zr8YR1OMwqW3KNjGQGWB4hUCyINYxNJfSrfD9llu98yQMHRDobHBj1j9GMUBTpfXhgk00ZET6yOby">
                 <MainLayout />
               </StripeProvider>
-                
             </ToastProvider>
           </ClerkTokenProvider>
         </Provider>

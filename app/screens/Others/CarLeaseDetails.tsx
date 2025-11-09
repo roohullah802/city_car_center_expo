@@ -1,10 +1,9 @@
-import React, { useState, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   FlatList,
@@ -12,17 +11,22 @@ import {
   Animated,
   Image,
   Pressable,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useGetCarDetailsQuery } from '../../../redux.toolkit/rtk/apis';
-import { RFValue } from 'react-native-responsive-fontsize';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../redux.toolkit/store';
-import { addFavCar, removeFavCar } from '../../../redux.toolkit/slices/userSlice';
-import { router, useLocalSearchParams } from 'expo-router';
+  ActivityIndicator,
+} from "react-native";
+import { SafeAreaView,useSafeAreaInsets } from "react-native-safe-area-context";
+import Icon from "react-native-vector-icons/Ionicons";
+import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import { useGetCarDetailsQuery } from "../../../redux.toolkit/rtk/apis";
+import { RFValue } from "react-native-responsive-fontsize";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../redux.toolkit/store";
+import {
+  addFavCar,
+  removeFavCar,
+} from "../../../redux.toolkit/slices/userSlice";
+import { router, useLocalSearchParams } from "expo-router";
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 const HEADER_HEIGHT_RATIO = 0.38;
 
@@ -39,7 +43,7 @@ const ImageItem: React.FC<{
     <View style={[styles.carImageContainer, { height: HEADER_HEIGHT }]}>
       {(isLoading || hasError) && (
         <Image
-          source={require('../../../assests/placeholder.png')}
+          source={require("../../../assests/placeholder.png")}
           style={[styles.carImage, styles.fallbackImage]}
           resizeMode="cover"
         />
@@ -63,19 +67,24 @@ const ImageItem: React.FC<{
   );
 };
 
-const CarDetails: React.FC= () => {
-  const {id} = useLocalSearchParams();
+
+const CarDetails: React.FC = () => {
+  const { id } = useLocalSearchParams();
   const { data: Cars, isLoading } = useGetCarDetailsQuery(id);
   const car = Cars?.data;
 
+  const insets = useSafeAreaInsets();
+  
+  
+
   const capitalize = (str: string) =>
     str
-      .split(' ')
-      .map(itm => itm.charAt(0).toUpperCase() + itm.slice(1))
-      .join(' ');
+      .split(" ")
+      .map((itm) => itm.charAt(0).toUpperCase() + itm.slice(1))
+      .join(" ");
 
   const favouriteCars = useSelector(
-    (state: RootState) => state.user.favouriteCars,
+    (state: RootState) => state.user.favouriteCars
   );
   const { isLoggedIn } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
@@ -88,7 +97,7 @@ const CarDetails: React.FC= () => {
   const images = useMemo(() => {
     if (!car?.images) return [];
     if (Array.isArray(car.images)) return car.images;
-    if (typeof car.images === 'string') {
+    if (typeof car.images === "string") {
       try {
         const parsed = JSON.parse(car.images);
         return Array.isArray(parsed) ? parsed : [];
@@ -109,32 +118,38 @@ const CarDetails: React.FC= () => {
   const renderImage = useCallback(
     ({ item, index }: { item: string; index: number }) => (
       <Pressable
-        onPress={() => router.push({pathname:"/screens/Others/CarImages", params:{id: car?._id}})}
+        onPress={() =>
+          router.push({
+            pathname: "/screens/Others/CarImages",
+            params: { id: car?._id },
+          })
+        }
       >
         <ImageItem item={item} index={index} HEADER_HEIGHT={HEADER_HEIGHT} />
       </Pressable>
     ),
-    [HEADER_HEIGHT, car],
+    [HEADER_HEIGHT, car]
   );
 
   const handleFav = useCallback(
     (item: any) => {
-      const isFav = favouriteCars?.some(items => items._id === item?._id);
+      const isFav = favouriteCars?.some((items) => items._id === item?._id);
       if (isFav) {
         dispatch(removeFavCar(item._id));
       } else {
         dispatch(addFavCar(item));
       }
     },
-    [favouriteCars, dispatch],
+    [favouriteCars, dispatch]
   );
 
-  const isFav = favouriteCars?.some(items => items._id === car?._id);
+  const isFav = favouriteCars?.some((items) => items._id === car?._id);
 
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading car details...</Text>
+         <ActivityIndicator size="large" color="#73C2FB" />
+        <Text style={styles.loadingText}>Loading ...</Text>
       </View>
     );
   }
@@ -160,7 +175,7 @@ const CarDetails: React.FC= () => {
         {images.length === 0 ? (
           <View style={[styles.carImageContainer, { height: HEADER_HEIGHT }]}>
             <Image
-              source={require('../../../assests/placeholder.png')}
+              source={require("../../../assests/placeholder.png")}
               style={styles.carImage}
               resizeMode="cover"
             />
@@ -212,7 +227,7 @@ const CarDetails: React.FC= () => {
             onPress={() => handleFav(car)}
           >
             <Icon
-              name={isFav ? 'heart' : 'heart-outline'}
+              name={isFav ? "heart" : "heart-outline"}
               size={22}
               color="#fff"
             />
@@ -224,11 +239,11 @@ const CarDetails: React.FC= () => {
       <ScrollView
         style={styles.detailsSection}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 90 + insets.bottom }]}
       >
         <View style={styles.titleRow}>
           <Text style={styles.carTitle} numberOfLines={1}>
-            {capitalize(car?.modelName) || 'N/A'}
+            {capitalize(car?.modelName) || "N/A"}
           </Text>
           <View style={styles.ratingRow}>
             <Icon name="star" size={15} color="#f5a623" />
@@ -310,7 +325,7 @@ const CarDetails: React.FC= () => {
           <Text
             style={styles.descriptionText}
             numberOfLines={isAct ? undefined : 2}
-            onTextLayout={e => {
+            onTextLayout={(e) => {
               if (e.nativeEvent.lines.length > 2) {
                 setIsShowMoreBtn(true);
               }
@@ -322,7 +337,7 @@ const CarDetails: React.FC= () => {
           {isShowMoreBtn && (
             <TouchableOpacity onPress={() => setIsAct(!isAct)}>
               <Text style={styles.showMoreBtn}>
-                {isAct ? 'Less' : 'show more'}
+                {isAct ? "Less" : "show more"}
               </Text>
             </TouchableOpacity>
           )}
@@ -360,7 +375,7 @@ const CarDetails: React.FC= () => {
       </ScrollView>
 
       {/* Footer */}
-      <View style={styles.footerRow}>
+      <View style={[styles.footerRow, {paddingBottom: insets.bottom + 2}]}>
         <View>
           <Text style={styles.footerPriceLabel}>Price: </Text>
           <Text style={styles.price}>${car?.pricePerDay}/day</Text>
@@ -370,9 +385,12 @@ const CarDetails: React.FC= () => {
           style={styles.buyBtn}
           onPress={() => {
             if (!isLoggedIn) {
-              router.push("/screens/Auth/SocialAuth")
+              router.push("/screens/Auth/SocialAuth");
             } else {
-              router.push({pathname:"/screens/Others/DateAndTime", params:{carId: car?._id}})
+              router.push({
+                pathname: "/screens/Others/DateAndTime",
+                params: { carId: car?._id },
+              });
             }
           }}
         >
@@ -386,24 +404,24 @@ const CarDetails: React.FC= () => {
 export default CarDetails;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  loadingText: { fontSize: 16, color: '#666', fontFamily: 'demiBold' },
+  container: { flex: 1, backgroundColor: "#fff" },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  loadingText: { fontSize: 16, color: "#666", fontFamily: "demiBold" },
 
   header: {
-    width: '100%',
-    backgroundColor: '#f0f0f0',
-    overflow: 'hidden',
-    position: 'relative',
+    width: "100%",
+    backgroundColor: "#f0f0f0",
+    overflow: "hidden",
+    position: "relative",
   },
   carImageContainer: {
     width,
-    position: 'relative',
+    position: "relative",
   },
   carImage: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
+    width: "100%",
+    height: "100%",
+    position: "absolute",
     top: 0,
     left: 0,
   },
@@ -411,17 +429,17 @@ const styles = StyleSheet.create({
   loadingImage: { opacity: 0 },
 
   overlayHeader: {
-    position: 'absolute',
-    top: 40,
+    position: "absolute",
+    top: 15,
     left: 20,
     right: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     zIndex: 20,
   },
   iconBtn: {
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: "rgba(0,0,0,0.5)",
     padding: 8,
     borderRadius: 20,
     zIndex: 21,
@@ -429,12 +447,12 @@ const styles = StyleSheet.create({
 
   detailsSection: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     padding: 20,
     marginTop: -30,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -5 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -443,123 +461,122 @@ const styles = StyleSheet.create({
   scrollContent: { paddingBottom: 40 },
 
   titleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 20,
   },
   carTitle: {
     fontSize: 22,
-    fontWeight: '700',
-    color: '#1F305E',
-    fontFamily: 'bold',
+    fontWeight: "700",
+    color: "#3f3f3fff",
+    fontFamily: "bold",
   },
-  ratingRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 5 },
+  ratingRow: { flexDirection: "row", alignItems: "center", marginVertical: 5 },
   rating: {
     marginLeft: 5,
     fontSize: 14,
-    color: '#1F305E',
-    fontFamily: 'demiBold',
+    color: "#3f3f3fff",
+    fontFamily: "demiBold",
   },
 
   statsRow: {
-    width: '100%',
+    width: "100%",
     height: 80,
-    backgroundColor: '#e7e8ebff',
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
+    backgroundColor: "#e7e8ebff",
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
     borderRadius: 10,
   },
-  statsCol: { alignItems: 'center', gap: 8 },
+  statsCol: { alignItems: "center", gap: 8 },
   statsLabel: {
-    color: 'black',
+    color: "black",
     fontSize: 10,
-    fontFamily: 'demiBold',
+    fontFamily: "demiBold",
   },
   statsValue: {
-    color: 'black',
-    fontFamily: 'demiBold',
+    color: "black",
+    fontFamily: "demiBold",
     fontSize: 11,
   },
 
   sectionTitle: {
-    fontFamily: 'bold',
+    fontFamily: "bold",
     fontSize: RFValue(12),
     marginTop: RFValue(10),
     marginBottom: RFValue(10),
-    color: '#1F305E',
+    color: "#3f3f3fff",
   },
   detailsBox: {
     borderWidth: 0.5,
-    borderColor: 'gray',
-    flexDirection: 'row',
-    overflow: 'hidden',
+    borderColor: "gray",
+    flexDirection: "row",
+    overflow: "hidden",
     borderRadius: 10,
   },
-  detailsLeft: { backgroundColor: '#e7e8ebff', width: '35%' },
-  detailsRight: { width: '65%' },
+  detailsLeft: { backgroundColor: "#e7e8ebff", width: "35%" },
+  detailsRight: { width: "65%" },
 
   priceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: RFValue(10),
     borderBottomWidth: 0.5,
-    borderColor: 'black',
+    borderColor: "black",
     paddingBottom: 5,
   },
   priceLabel: {
-    width: '100%',
+    width: "100%",
     fontSize: RFValue(10),
-    fontFamily: 'demiBold',
-    color: 'black',
+    fontFamily: "demiBold",
+    color: "black",
     marginLeft: 10,
     marginRight: 10,
   },
   priceValue: {
-    width: '55%',
+    width: "55%",
     fontSize: RFValue(10),
-    fontFamily: 'demiBold',
-    color: 'black',
+    fontFamily: "demiBold",
+    color: "black",
     marginLeft: 10,
   },
   noBorder: { borderBottomWidth: 0 },
 
   descriptionTitle: {
-    color: '#1F305E',
+    color: "#3f3f3fff",
     marginTop: 20,
-    fontFamily: 'bold',
+    fontFamily: "bold",
   },
   descriptionText: {
-    color: 'black',
-    fontFamily: 'medium',
+    color: "black",
+    fontFamily: "medium",
     fontSize: 12,
     marginTop: 10,
   },
   showMoreBtn: {
-    color: '#73C2FB',
-    fontFamily: 'demiBold',
+    color: "#73C2FB",
+    fontFamily: "demiBold",
     fontSize: 12,
-    position: 'absolute',
+    position: "absolute",
     right: 0,
   },
 
   featuresTitle: {
-    fontFamily: 'bold',
-    color: '#1F305E',
+    fontFamily: "bold",
+    color: "#3f3f3fff",
     marginTop: 20,
   },
   featuresRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginVertical: 10,
-    marginBottom: 50,
   },
   featureCard: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
     paddingVertical: 20,
     margin: 5,
-    backgroundColor: '#eef5ff',
+    backgroundColor: "#eef5ff",
     gap: 5,
     borderRadius: 10,
   },
@@ -567,78 +584,76 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 50,
-    backgroundColor: '#FEFEFA',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#FEFEFA",
+    alignItems: "center",
+    justifyContent: "center",
   },
   featureValue: {
     fontSize: 13,
-    fontWeight: '600',
-    color: '#1F305E',
-    fontFamily: 'bold',
+    fontWeight: "600",
+    color: "#3f3f3fff",
+    fontFamily: "bold",
   },
   featureLabel: {
     fontSize: 10,
-    color: '#666',
+    color: "#666",
     marginTop: 3,
-    fontFamily: 'demiBold',
+    fontFamily: "demiBold",
   },
 
   footerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: -10,
-    position: 'absolute',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    position: "absolute",
     bottom: 0,
-    backgroundColor: 'white',
-    width: '100%',
+    backgroundColor: "white",
+    width: "100%",
     paddingTop: 5,
-    paddingBottom: 5,
     paddingLeft: 20,
     paddingRight: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 10,
   },
   footerPriceLabel: {
-    color: '#1F305E',
+    color: "#3f3f3fff",
     marginTop: 15,
     fontSize: 10,
   },
   price: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#1F305E',
-    fontFamily: 'bold',
+    fontWeight: "700",
+    color: "#3f3f3fff",
+    fontFamily: "bold",
   },
   buyBtn: {
-    backgroundColor: '#73C2FB',
+    backgroundColor: "#73C2FB",
     paddingVertical: 12,
     paddingHorizontal: 80,
     borderRadius: 30,
   },
   buyText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 12,
-    fontWeight: '600',
-    fontFamily: 'demiBold',
+    fontWeight: "600",
+    fontFamily: "demiBold",
   },
 
   dotsContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 20,
-    alignSelf: 'center',
-    flexDirection: 'row',
+    alignSelf: "center",
+    flexDirection: "row",
     zIndex: 20,
   },
   dot: {
     width: 13,
     height: 3,
     borderRadius: 2,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     margin: 2,
   },
 });

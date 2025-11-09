@@ -1,11 +1,10 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
   Text,
   TextInput,
   FlatList,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   TouchableOpacity,
   TouchableWithoutFeedback,
@@ -13,13 +12,18 @@ import {
   ActivityIndicator,
   Pressable,
   Image,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { useGetCarsQuery } from '../../../redux.toolkit/rtk/apis';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../redux.toolkit/store';
-import { addFavCar, removeFavCar } from '../../../redux.toolkit/slices/userSlice';
-import { router, useLocalSearchParams } from 'expo-router';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Icon from "react-native-vector-icons/Ionicons";
+import { useGetCarsQuery } from "../../../redux.toolkit/rtk/apis";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../redux.toolkit/store";
+import {
+  addFavCar,
+  removeFavCar,
+} from "../../../redux.toolkit/slices/userSlice";
+import { router, useLocalSearchParams } from "expo-router";
+import { Platform } from "react-native";
 
 interface Car {
   modelName: string;
@@ -32,25 +36,26 @@ interface Car {
 }
 
 const CarCardsByBrand: React.FC = () => {
-  const [searchText, setSearchText] = useState<string>('');
-  const {brand} = useLocalSearchParams<{brand: string}>();
+  const [searchText, setSearchText] = useState<string>("");
+  const { brand } = useLocalSearchParams<{ brand: string }>();
   const { data: Cars, isLoading } = useGetCarsQuery([]);
 
   const favouriteCars = useSelector(
-        (state: RootState) => state.user.favouriteCars,
-      );
-      const dispatch = useDispatch();
-  
-  
-     const handleFav = useCallback((item: any)=>{
-        const isFav = favouriteCars.some(c => c._id === item._id);
-        if (isFav) {
-          dispatch(removeFavCar(item._id))
-        }else{
-          dispatch(addFavCar(item));
-        }
-  
-     },[favouriteCars, dispatch])
+    (state: RootState) => state.user.favouriteCars
+  );
+  const dispatch = useDispatch();
+
+  const handleFav = useCallback(
+    (item: any) => {
+      const isFav = favouriteCars.some((c) => c._id === item._id);
+      if (isFav) {
+        dispatch(removeFavCar(item._id));
+      } else {
+        dispatch(addFavCar(item));
+      }
+    },
+    [favouriteCars, dispatch]
+  );
 
   const filteredCars = useMemo(() => {
     if (!Cars?.data) return [];
@@ -65,11 +70,16 @@ const CarCardsByBrand: React.FC = () => {
 
   const renderCarCard = useCallback(
     ({ item }: { item: Car }) => {
-      const isFav = favouriteCars.some(c => c._id === item._id);
+      const isFav = favouriteCars.some((c) => c._id === item._id);
       return (
         <Pressable
           style={({ pressed }) => [styles.pressable, pressed && styles.pressed]}
-          onPress={() => router.push({pathname:"/screens/Others/CarLeaseDetails", params:{_id: item?._id}})}
+          onPress={() =>
+            router.push({
+              pathname: "/screens/Others/CarLeaseDetails",
+              params: { id: item?._id },
+            })
+          }
         >
           <View style={styles.card}>
             <Image
@@ -78,8 +88,12 @@ const CarCardsByBrand: React.FC = () => {
               resizeMode="cover"
             />
             <View style={styles.details}>
-              <Text style={styles.name} numberOfLines={1}>{item.modelName}</Text>
-              <Text style={styles.price} numberOfLines={1}>Price: ${item.pricePerDay}/day</Text>
+              <Text style={styles.name} numberOfLines={1}>
+                {item.modelName}
+              </Text>
+              <Text style={styles.price} numberOfLines={1}>
+                Price: ${item.pricePerDay}/day
+              </Text>
 
               <View style={styles.rating}>
                 <Icon name="star" size={16} color="#fbbf24" />
@@ -89,12 +103,27 @@ const CarCardsByBrand: React.FC = () => {
               </View>
 
               <View style={styles.actionsRow}>
-                <TouchableOpacity style={styles.rentBtn} onPress={()=> router.push({pathname:"/screens/Others/DateAndTime", params:{carId: item?._id}})}>
+                <TouchableOpacity
+                  style={styles.rentBtn}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/screens/Others/DateAndTime",
+                      params: { carId: item?._id },
+                    })
+                  }
+                >
                   <Text style={styles.rentBtnText}>Rent Now</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.heartBtn} onPress={()=> handleFav(item)}>
-                  <Icon name={isFav ? "heart":"heart-outline"} color='#73C2FB' size={18} />
+                <TouchableOpacity
+                  style={styles.heartBtn}
+                  onPress={() => handleFav(item)}
+                >
+                  <Icon
+                    name={isFav ? "heart" : "heart-outline"}
+                    color="#73C2FB"
+                    size={18}
+                  />
                 </TouchableOpacity>
               </View>
             </View>
@@ -108,8 +137,8 @@ const CarCardsByBrand: React.FC = () => {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#000" />
-        <Text style={styles.message}>Loading available cars...</Text>
+        <ActivityIndicator size="large" color="#73C2FB" />
+        <Text style={styles.message}>Loading...</Text>
       </View>
     );
   }
@@ -122,7 +151,7 @@ const CarCardsByBrand: React.FC = () => {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Icon name="arrow-back" size={24} color='#1F305E' />
+          <Icon name="arrow-back" size={24} color="#1F305E" />
         </TouchableOpacity>
 
         <Text style={styles.title}>Available Cars</Text>
@@ -161,7 +190,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
+    paddingTop:Platform.OS === 'android' ? 20 : 30
   },
   backButton: {
     marginTop: 10,
@@ -170,15 +200,15 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: '600',
+    fontWeight: "600",
     marginVertical: 10,
-    color: '#1F305E',
-    fontFamily: 'bold',
+    color: "#3f3f3fff",
+    fontFamily: "bold",
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f2f2f2',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f2f2f2",
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 45,
@@ -188,107 +218,107 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 8,
     fontSize: 16,
-    color: '#333',
-    fontFamily: 'demiBold',
+    color: "#333",
+    fontFamily: "demiBold",
   },
   card: {
-    flexDirection: 'row',
-    backgroundColor: '#f9f9f9',
+    flexDirection: "row",
+    backgroundColor: "#f9f9f9",
     borderRadius: 12,
     marginBottom: 16,
-    shadowColor: '#98817B',
+    shadowColor: "#98817B",
     shadowOpacity: 0.02,
     shadowRadius: 10,
     elevation: 2,
-    overflow: 'hidden',
+    overflow: "hidden",
     height: 130,
-    width: '99%',
+    width: "99%",
   },
   image: {
-    width: '55%',
-    height: '100%',
+    width: "55%",
+    height: "100%",
   },
   details: {
     flex: 1,
     padding: 10,
-    backgroundColor: '#fff',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
+    backgroundColor: "#fff",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
   },
   name: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1F305E',
-    fontFamily: 'bold',
+    fontWeight: "600",
+    color: "#3f3f3fff",
+    fontFamily: "bold",
   },
   price: {
     fontSize: 10,
-    fontWeight: '600',
-    color: '#1F305E',
-    fontFamily: 'bold',
+    fontWeight: "600",
+    color: "#3f3f3fff",
+    fontFamily: "bold",
   },
   rating: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   ratingText: {
     fontSize: 7,
-    color: '#1F305E',
-    fontFamily: 'demiBold',
+    color: "#3f3f3fff",
+    fontFamily: "demiBold",
     marginLeft: 4,
   },
   actionsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     gap: 10,
   },
   rentBtn: {
-    backgroundColor: '#73C2FB',
+    backgroundColor: "#73C2FB",
     width: 90,
     paddingVertical: 7,
     borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   rentBtnText: {
     fontSize: 10,
-    fontFamily: 'demiBold',
-    color: 'white',
+    fontFamily: "demiBold",
+    color: "white",
   },
   heartBtn: {
     padding: 8,
-    backgroundColor: '#eef5ff',
+    backgroundColor: "#eef5ff",
     borderRadius: 50,
   },
   noData: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 40,
   },
   noDataText: {
-    fontFamily: 'demiBold',
+    fontFamily: "demiBold",
   },
   centered: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   message: {
     fontSize: 14,
-    textAlign: 'center',
-    color: '#666',
+    textAlign: "center",
+    color: "#666",
     marginTop: 8,
-    fontFamily: 'medium',
+    fontFamily: "medium",
   },
   listContainer: {
     paddingBottom: 20,
   },
   pressable: {
-    width: '100%',
+    width: "100%",
   },
   pressed: {
     opacity: 0.9,

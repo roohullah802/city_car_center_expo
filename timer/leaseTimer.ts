@@ -1,19 +1,23 @@
-// hooks/useCountdowns.ts
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-const countDown = (endDate: string) => {
+interface Countdown {
+  days: string;
+  hours: string;
+  minutes: string;
+  seconds: string;
+}
+
+const getCountdown = (endDate: string): Countdown => {
   const now = new Date().getTime();
   const end = new Date(endDate).getTime();
-  const difference = end - now;
+  const diff = end - now;
 
-  if (difference <= 0) {
-    return { days: '00', hours: '00', minutes: '00', seconds: '00' };
-  }
+  if (diff <= 0) return { days: '00', hours: '00', minutes: '00', seconds: '00' };
 
-  const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
   return {
     days: String(days).padStart(2, '0'),
@@ -24,21 +28,22 @@ const countDown = (endDate: string) => {
 };
 
 export const useCountdowns = (leases: any[] = []) => {
-  const [tick, setTick] = useState(0);
+  const [leasesWithCountdown, setLeasesWithCountdown] = useState<any[]>([]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTick(prev => prev + 1);
-    }, 1000);
+    const updateCountdowns = () => {
+      const updated = leases.map((lease) => ({
+        ...lease,
+        countdown: getCountdown(lease.endDate),
+      }));
+      setLeasesWithCountdown(updated);
+    };
+
+    updateCountdowns(); // initial run
+    const interval = setInterval(updateCountdowns, 1000); // update every second
+
     return () => clearInterval(interval);
-  }, []);
+  }, [leases]);
 
-  const leasesWithTimer = useMemo(() => {
-    return leases.map((lease: any) => ({
-      ...lease,
-      countdown: countDown(lease.endDate),
-    }));
-  }, [leases, tick]);
-
-  return leasesWithTimer;
+  return leasesWithCountdown;
 };

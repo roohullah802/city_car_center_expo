@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useGetAllFaqsQuery } from '../../../redux.toolkit/rtk/apis';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { Platform } from 'react-native';
 
 interface FAQItem {
   question: string;
@@ -49,7 +50,7 @@ const FAQScreen: React.FC = () => {
     if (isLoading) {
       return (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#1F305E" />
+          <ActivityIndicator size="large" color="#73C2FB" />
           <Text style={styles.message}>Loading FAQs...</Text>
         </View>
       );
@@ -102,6 +103,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'android' ? 20 : 30
   },
   header: {
     fontSize: 26,
@@ -109,11 +111,11 @@ const styles = StyleSheet.create({
     marginTop: 30,
     marginBottom: 4,
     fontFamily: 'bold',
-    color: '#1F305E',
+    color: '#3f3f3fff',
   },
   subHeader: {
     fontSize: 14,
-    color: '#1F305E',
+    color: '#3f3f3fff',
     marginBottom: 20,
     fontFamily: 'demiBold',
   },
@@ -138,13 +140,13 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     flex: 1,
     fontFamily: 'demiBold',
-    color: '#1F305E',
+    color: '#3f3f3fff',
   },
   toggle: {
     fontSize: 20,
     fontWeight: '500',
     paddingLeft: 10,
-    color: '#1F305E',
+    color: '#3f3f3fff',
   },
   answer: {
     marginTop: 10,
@@ -175,7 +177,7 @@ const styles = StyleSheet.create({
   },
   retryButton: {
     marginTop: 16,
-    backgroundColor: '#1F305E',
+    backgroundColor: '#3f3f3fff',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 6,

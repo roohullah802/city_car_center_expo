@@ -6,14 +6,15 @@ import {
   FlatList,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   StatusBar,
   ActivityIndicator,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context'
 import BrandCard from '../../../componentss/BrandCard';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useGetBrandsQuery } from '../../../redux.toolkit/rtk/apis';
 import { router } from 'expo-router';
+import { Platform } from 'react-native';
 
 const TopBrandsScreen: React.FC = () => {
   const [search, setSearch] = useState<string>('');
@@ -37,8 +38,8 @@ const TopBrandsScreen: React.FC = () => {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#000" />
-        <Text style={styles.message}>Loading city car centers...</Text>
+        <ActivityIndicator size="large" color="#73C2FB" />
+        <Text style={styles.message}>Loading...</Text>
       </View>
     );
   }
@@ -90,7 +91,9 @@ const TopBrandsScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', paddingHorizontal: 16 },
+  container: { flex: 1, backgroundColor: '#fff', paddingHorizontal: 16, 
+    paddingTop:Platform.OS === 'android' ? 20 : 30
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -100,7 +103,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1F305E',
+    color: '#3f3f3fff',
     fontFamily: 'bold',
   },
   searchBox: {

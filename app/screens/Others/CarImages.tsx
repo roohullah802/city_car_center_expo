@@ -19,8 +19,7 @@ function CarImages() {
   const car = Cars?.data;
 
   const [imageSizes, setImageSizes] = useState<
-    { width: number; height: number }[]
-  >([]);
+    { width: number; height: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -100,7 +99,7 @@ function CarImages() {
                   {loading && (
                     <ActivityIndicator
                       size="large"
-                      color="#fff"
+                      color="#73C2FB"
                       style={{ position: 'absolute' }}
                     />
                   )}

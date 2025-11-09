@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: RFValue(20),
     fontFamily: 'bold',
-    color: '#1F305E',
+    color: '#3f3f3fff',
     marginVertical: RFValue(16),
   },
   profileCard: {
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   name: {
     fontSize: RFValue(14),
     fontFamily: 'bold',
-    color: '#1F305E',
+    color: 'black',
   },
   email: {
     fontSize: RFValue(11),
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     fontSize: RFValue(13),
-    color: '#1F305E',
+    color: 'black',
     marginLeft: RFValue(12),
     flexShrink: 1,
     fontFamily: 'demiBold',

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -6,22 +6,26 @@ import {
   FlatList,
   Image,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   TouchableOpacity,
   Pressable,
   TouchableWithoutFeedback,
   Keyboard,
   ActivityIndicator,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import BottomSheetFilterModal from './BottomSheetFilterModel';
-import { Modalize } from 'react-native-modalize';
-import { useGetCarsQuery } from '../../../redux.toolkit/rtk/apis';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../redux.toolkit/store';
-import { addFavCar, removeFavCar } from '../../../redux.toolkit/slices/userSlice';
-import { router } from 'expo-router';
+  Platform,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Icon from "react-native-vector-icons/Ionicons";
+import BottomSheetFilterModal from "./BottomSheetFilterModel";
+import { Modalize } from "react-native-modalize";
+import { useGetCarsQuery } from "../../../redux.toolkit/rtk/apis";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../redux.toolkit/store";
+import {
+  addFavCar,
+  removeFavCar,
+} from "../../../redux.toolkit/slices/userSlice";
+import { router } from "expo-router";
 
 interface Car {
   modelName: string;
@@ -35,28 +39,29 @@ interface Car {
 }
 
 const SearchCarCards: React.FC = () => {
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [priceRange, setPriceRange] = useState<[number, number]>([1, 1000]);
 
   const ref = useRef<Modalize>(null);
   const { data: Cars, isLoading } = useGetCarsQuery([]);
 
-   const favouriteCars = useSelector(
-      (state: RootState) => state.user.favouriteCars,
-    );
-    const dispatch = useDispatch();
+  const favouriteCars = useSelector(
+    (state: RootState) => state.user.favouriteCars
+  );
+  const dispatch = useDispatch();
 
-
-   const handleFav = useCallback((item: any)=>{
-      const isFav = favouriteCars.some(c => c._id === item._id);
+  const handleFav = useCallback(
+    (item: any) => {
+      const isFav = favouriteCars.some((c) => c._id === item._id);
       if (isFav) {
-        dispatch(removeFavCar(item._id))
-      }else{
+        dispatch(removeFavCar(item._id));
+      } else {
         dispatch(addFavCar(item));
       }
-
-   },[favouriteCars, dispatch])
+    },
+    [favouriteCars, dispatch]
+  );
 
   const filteredCars = useMemo(() => {
     if (!Cars?.data) return [];
@@ -75,8 +80,7 @@ const SearchCarCards: React.FC = () => {
       )
       .filter(
         (item: Car) =>
-          item.pricePerDay >= priceRange[0] &&
-          item.pricePerDay <= priceRange[1]
+          item.pricePerDay >= priceRange[0] && item.pricePerDay <= priceRange[1]
       );
   }, [filteredCars, priceRange, selectedBrand]);
 
@@ -84,54 +88,79 @@ const SearchCarCards: React.FC = () => {
   const openFilterModal = () => ref.current?.open();
 
   const renderCarCard = useCallback(
-    ({ item }: { item: Car }) =>{ 
-      const isFav = favouriteCars.some(c => c._id === item._id);
-      return(
-      <Pressable
-        style={({ pressed }) => [
-          styles.cardWrapper,
-          pressed && styles.cardPressed,
-        ]}
-        onPress={() => router.push({pathname:"/screens/Others/CarLeaseDetails", params:{_id: item?._id}})}
-      >
-        <View style={styles.card}>
-          <Image
-            source={{ uri: item.images[0] }}
-            style={styles.image}
-            resizeMode="cover"
-          />
-          <View style={styles.details}>
-            <Text style={styles.name} numberOfLines={1}>{item.modelName}</Text>
-            <Text style={styles.price} numberOfLines={1}>Price: ${item.pricePerDay}/day</Text>
-
-            <View style={styles.rating}>
-              <Icon name="star" size={16} color="#fbbf24" />
-              <Text style={styles.ratingText}>
-                ({item.totalReviews} Reviews)
+    ({ item }: { item: Car }) => {
+      const isFav = favouriteCars.some((c) => c._id === item._id);
+      return (
+        <Pressable
+          style={({ pressed }) => [
+            styles.cardWrapper,
+            pressed && styles.cardPressed,
+          ]}
+          onPress={() =>
+            router.push({
+              pathname: "/screens/Others/CarLeaseDetails",
+              params: { id: item?._id },
+            })
+          }
+        >
+          <View style={styles.card}>
+            <Image
+              source={{ uri: item.images[0] }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+            <View style={styles.details}>
+              <Text style={styles.name} numberOfLines={1}>
+                {item.modelName}
               </Text>
-            </View>
+              <Text style={styles.price} numberOfLines={1}>
+                Price: ${item.pricePerDay}/day
+              </Text>
 
-            <View style={styles.actionRow}>
-              <TouchableOpacity style={styles.rentBtn} onPress={()=> router.push({pathname:"/screens/Others/DateAndTime", params:{carId: item?._id}})}>
-                <Text style={styles.rentBtnText}>Rent Now</Text>
-              </TouchableOpacity>
+              <View style={styles.rating}>
+                <Icon name="star" size={16} color="#fbbf24" />
+                <Text style={styles.ratingText}>
+                  ({item.totalReviews} Reviews)
+                </Text>
+              </View>
 
-              <TouchableOpacity style={styles.heartBtn} onPress={()=> handleFav(item)}>
-                <Icon name={isFav ? "heart":"heart-outline"} color='#73C2FB' size={18} />
-              </TouchableOpacity>
+              <View style={styles.actionRow}>
+                <TouchableOpacity
+                  style={styles.rentBtn}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/screens/Others/DateAndTime",
+                      params: { carId: item?._id },
+                    })
+                  }
+                >
+                  <Text style={styles.rentBtnText}>Rent Now</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.heartBtn}
+                  onPress={() => handleFav(item)}
+                >
+                  <Icon
+                    name={isFav ? "heart" : "heart-outline"}
+                    color="#73C2FB"
+                    size={18}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Pressable>
-    )},
+        </Pressable>
+      );
+    },
     [favouriteCars, handleFav]
   );
 
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#000" />
-        <Text style={styles.message}>Loading city car center...</Text>
+         <ActivityIndicator size="large" color="#73C2FB" />
+        <Text style={styles.message}>Loading...</Text>
       </View>
     );
   }
@@ -145,7 +174,7 @@ const SearchCarCards: React.FC = () => {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Icon name="arrow-back" size={24} color='#1F305E' />
+          <Icon name="arrow-back" size={24} color="#1F305E" />
         </TouchableOpacity>
 
         <Text style={styles.title}>Available Cars</Text>
@@ -197,7 +226,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
+    paddingTop:Platform.OS === 'android' ? 20 : 30
   },
   backButton: {
     marginTop: 10,
@@ -206,15 +236,15 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: '600',
+    fontWeight: "600",
     marginVertical: 10,
-    color: '#1F305E',
-    fontFamily: 'bold',
+    color: "#3f3f3fff",
+    fontFamily: "bold",
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f2f2f2',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f2f2f2",
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 45,
@@ -224,110 +254,110 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 8,
     fontSize: 16,
-    color: '#333',
-    fontFamily: 'demiBold',
+    color: "#333",
+    fontFamily: "demiBold",
   },
   cardWrapper: {
-    width: '100%',
+    width: "100%",
   },
   cardPressed: {
     opacity: 0.9,
   },
   card: {
-    flexDirection: 'row',
-    backgroundColor: '#f9f9f9',
+    flexDirection: "row",
+    backgroundColor: "#f9f9f9",
     borderRadius: 12,
     marginBottom: 16,
-    shadowColor: '#98817B',
+    shadowColor: "#98817B",
     shadowOpacity: 0.02,
     shadowRadius: 10,
     elevation: 2,
-    overflow: 'hidden',
+    overflow: "hidden",
     height: 130,
-    width: '99%',
+    width: "99%",
   },
   image: {
-    width: '55%',
-    height: '100%',
+    width: "55%",
+    height: "100%",
   },
   details: {
     flex: 1,
     padding: 10,
-    backgroundColor: '#fff',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
+    backgroundColor: "#fff",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
   },
   name: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1F305E',
-    fontFamily: 'bold',
+    fontWeight: "600",
+    color: "#3f3f3fff",
+    fontFamily: "bold",
   },
   price: {
     fontSize: 10,
-    fontWeight: '600',
-    color: '#1F305E',
-    fontFamily: 'bold',
+    fontWeight: "600",
+    color: "#3f3f3fff",
+    fontFamily: "bold",
   },
   rating: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   ratingText: {
     fontSize: 7,
-    color: '#1F305E',
-    fontFamily: 'demiBold',
+    color: "#3f3f3fff",
+    fontFamily: "demiBold",
     marginLeft: 4,
   },
   actionRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     gap: 10,
   },
   rentBtn: {
-    backgroundColor: '#73C2FB',
+    backgroundColor: "#73C2FB",
     width: 90,
     paddingVertical: 7,
     borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   rentBtnText: {
     fontSize: 10,
-    fontFamily: 'demiBold',
-    color: 'white',
+    fontFamily: "demiBold",
+    color: "white",
   },
   heartBtn: {
     padding: 8,
-    backgroundColor: '#eef5ff',
+    backgroundColor: "#eef5ff",
     borderRadius: 50,
   },
   noData: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 40,
   },
   noDataText: {
-    fontFamily: 'demiBold',
+    fontFamily: "demiBold",
     marginTop: 10,
     fontSize: 14,
-    color: '#333',
+    color: "#333",
   },
   centered: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   message: {
     fontSize: 14,
-    textAlign: 'center',
-    color: '#666',
+    textAlign: "center",
+    color: "#666",
     marginTop: 8,
-    fontFamily: 'medium',
+    fontFamily: "medium",
   },
   listContainer: {
     paddingBottom: 20,

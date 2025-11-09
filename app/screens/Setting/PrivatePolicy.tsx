@@ -7,6 +7,7 @@ import {
   Dimensions,
   ActivityIndicator,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { useGetPolicyQuery } from '../../../redux.toolkit/rtk/apis';
@@ -33,8 +34,8 @@ const TermsPrivacyScreen: React.FC = () => {
   if (isLoading) {
       return (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#000" />
-          <Text style={styles.message}>Loading city car centers...</Text>
+          <ActivityIndicator size="large" color="#73C2FB" />
+          <Text style={styles.message}>Loading...</Text>
         </View>
       );
     }
@@ -72,6 +73,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'android' ? 20 : 30
   },
   contentContainer: {
     paddingHorizontal: width * 0.05,

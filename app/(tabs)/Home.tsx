@@ -17,6 +17,7 @@ import {
   Pressable,
   RefreshControl,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -170,7 +171,7 @@ const HomeScreen: React.FC = () => {
               style={styles.carImage}
               resizeMode="cover"
             />
-            <Text style={styles.carName}>{capitalize(item.modelName)}</Text>
+            <Text  numberOfLines={1} style={styles.carName}>{capitalize(item.modelName)}</Text>
 
             <View style={styles.carFooter}>
               <Text style={styles.carPrice}>${item.pricePerDay}/day</Text>
@@ -383,6 +384,7 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     backgroundColor: "#FFFFFF",
+    paddingTop: Platform.OS === "android" ? 20 : 30
   },
 
   loadingScreen: {
@@ -401,7 +403,7 @@ const styles = StyleSheet.create({
 
   locationLabel: {
     fontSize: 11,
-    color: "#1F305E",
+    color: "#3f3f3fff",
     fontFamily: 'bold',
   },
 
@@ -416,7 +418,7 @@ const styles = StyleSheet.create({
   guest: {
     fontFamily: 'bold',
     fontSize: 20,
-    color: "#1F305E",
+    color: "#3f3f3fff",
   },
 
   profileImage: {
@@ -428,8 +430,8 @@ const styles = StyleSheet.create({
   title: {
     paddingHorizontal: 16,
     fontSize: 14,
-    marginTop: 16,
-    color: "#1F305E",
+    marginTop: 20,
+    color: "#3f3f3fff",
     fontFamily: 'bold',
   },
 
@@ -474,7 +476,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontFamily: 'bold',
-    color: "#1F305E",
+    color: "#3f3f3fff",
   },
 
   seeAll: {
@@ -521,9 +523,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginTop: 10,
     fontFamily: 'bold',
-    color: "#1F305E",
+    color: "#3f3f3fff",
     marginLeft: 10,
-    marginBottom: 20,
+    marginRight:10,
+    marginBottom: 20
   },
 
   carFooter: {
@@ -535,7 +538,7 @@ const styles = StyleSheet.create({
 
   carPrice: {
     fontSize: 11,
-    color: "#1F305E",
+    color: "#3f3f3fff",
     fontFamily: 'demiBold',
   },
 
@@ -578,7 +581,7 @@ const styles = StyleSheet.create({
   modalName: {
     fontSize: 16,
     fontFamily: 'bold',
-    color: "#1F305E",
+    color: "black",
     marginBottom: 5,
   },
 

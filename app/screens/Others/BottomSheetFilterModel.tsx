@@ -83,7 +83,7 @@ const BottomSheetFilterModal = React.memo(forwardRef<Modalize, FilterModalProps>
            <Text style={styles.label}>Brand</Text>
           <View style={styles.brandContainer}>
             {isLoading ? (
-              <ActivityIndicator size="large" color="black" />
+              <ActivityIndicator size="large" color="#73C2FB" />
             ) : (
               Brands?.brands?.map(({ brand }: any) => (
                 <TouchableOpacity
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginTop: 10,
     fontFamily:'demiBold',
-    color:'#1F305E'
+    color:'#3f3f3fff'
   },
   brandContainer: {
     flexDirection: 'row',

@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -8,7 +7,9 @@ import {
   View,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context'
 import Icon from 'react-native-vector-icons/Ionicons';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { useGetLeaseDetailsQuery } from '../../../redux.toolkit/rtk/leaseApis';
@@ -93,7 +94,7 @@ const LeaseDetails: React.FC = () => {
   if (isLoading || !lease) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#1F305E" />
+        <ActivityIndicator size="large" color="#73C2FB" />
         <Text style={styles.message}>Loading lease details...</Text>
       </View>
     );
@@ -214,7 +215,7 @@ const LeaseDetails: React.FC = () => {
   );
 };
 
-// ✅ Reusable InfoRow component
+
 const InfoRow = ({
   label,
   value,
@@ -240,6 +241,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: RFValue(15),
     backgroundColor: '#fff',
+    paddingTop:Platform.OS === 'android' ? 10: 30
   },
   scrollContent: {
     padding: 3,
@@ -257,7 +259,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: RFValue(14),
     fontFamily: 'bold',
-    color: '#1F305E',
+    color: '#3f3f3fff',
   },
   menuWrapper: {
     position: 'relative',
@@ -281,19 +283,19 @@ const styles = StyleSheet.create({
   dropdownItem: {
     paddingVertical: RFValue(10),
     paddingHorizontal: RFValue(12),
-    color: '#1F305E',
+    color: '#3f3f3fff',
   },
   dropdownText: {
     fontFamily: 'demiBold',
     fontSize: RFValue(11),
-    color: '#1F305E',
+    color: '#3f3f3fff',
   },
   sectionTitle: {
     fontFamily: 'bold',
     fontSize: RFValue(12),
     marginTop: RFValue(20),
     marginBottom: RFValue(10),
-    color: '#1F305E',
+    color: '#3f3f3fff',
   },
   priceRow: {
     flexDirection: 'row',
@@ -303,12 +305,12 @@ const styles = StyleSheet.create({
   priceLabel: {
     fontSize: RFValue(10),
     fontFamily: 'demiBold',
-    color: '#1F305E',
+    color: '#3f3f3fff',
   },
   priceValue: {
     fontSize: RFValue(10),
     fontFamily: 'demiBold',
-    color: '#1F305E',
+    color: '#3f3f3fff',
   },
   statusActive: {
     color: 'green',
@@ -335,7 +337,7 @@ const styles = StyleSheet.create({
   },
   rateLabel: {
     fontSize: RFValue(10),
-    color: '#1F305E',
+    color: '#3f3f3fff',
     textAlign: 'center',
     marginBottom: RFValue(4),
     fontFamily: 'demiBold',
@@ -343,7 +345,7 @@ const styles = StyleSheet.create({
   rateValue: {
     fontSize: RFValue(14),
     fontWeight: '600',
-    color: '#1F305E',
+    color: '#3f3f3fff',
     fontFamily: 'demiBold',
   },
   contactRow: {
@@ -355,7 +357,7 @@ const styles = StyleSheet.create({
     marginTop: RFValue(10),
   },
   contactText: {
-    color: '#1F305E',
+    color: '#3f3f3fff',
     fontSize: RFValue(10),
     fontFamily: 'demiBold',
   },

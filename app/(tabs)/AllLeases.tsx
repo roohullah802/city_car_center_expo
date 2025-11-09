@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Platform,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
@@ -10,20 +9,21 @@ import {
   FlatList,
   Pressable,
   ActivityIndicator,
-} from 'react-native';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../redux.toolkit/store';
-import { useFocusEffect } from '@react-navigation/native';
-import { useGetAllActiveLeasesQuery } from '../../redux.toolkit/rtk/leaseApis';
-import { useCountdowns } from '../../timer/leaseTimer';
-import {io} from 'socket.io-client';
-import { router } from 'expo-router';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux.toolkit/store";
+import { useFocusEffect } from "@react-navigation/native";
+import { useGetAllActiveLeasesQuery } from "../../redux.toolkit/rtk/leaseApis";
+import { useCountdowns } from "../../timer/leaseTimer";
+import { io } from "socket.io-client";
+import { router } from "expo-router";
 
-const socket = io('https://api.citycarcenters.com');
+const socket = io("https://api.citycarcenters.com");
 
 const AllLeases: React.FC = () => {
   const { isLoggedIn, userData } = useSelector(
-    (state: RootState) => state.user,
+    (state: RootState) => state.user
   );
 
   const [refreshing, setRefreshing] = useState(false);
@@ -42,21 +42,20 @@ const AllLeases: React.FC = () => {
   }, [LeasesData]);
 
   useEffect(() => {
-    socket.on('leaseCreated', lease => {
-      setLeases(prev => {
+    socket.on("leaseCreated", (lease) => {
+      setLeases((prev) => {
         if (!Array.isArray(prev)) return [lease];
         return [lease, ...prev];
       });
     });
 
-    socket.on('leaseExtended', updatedLease => {
-
-      setLeases(prev => prev.filter(l => l._id !== updatedLease._id));
+    socket.on("leaseExtended", (updatedLease) => {
+      setLeases((prev) => prev.filter((l) => l._id !== updatedLease._id));
     });
 
     return () => {
-      socket.off('leaseCreated');
-      socket.off('leaseExtended');
+      socket.off("leaseCreated");
+      socket.off("leaseExtended");
     };
   }, []);
 
@@ -65,9 +64,8 @@ const AllLeases: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       refetch();
-    }, [refetch]),
+    }, [refetch])
   );
-
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -81,7 +79,12 @@ const AllLeases: React.FC = () => {
   const leasesCallBack = useCallback(
     ({ item }: any) => (
       <Pressable
-        onPress={() => router.push({pathname:"/screens/Lease/LeaseDetails", params:{id: item?._id}})}
+        onPress={() =>
+          router.push({
+            pathname: "/screens/Lease/LeaseDetails",
+            params: { id: item?._id },
+          })
+        }
         style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
       >
         <View style={styles.leaseCard}>
@@ -90,23 +93,26 @@ const AllLeases: React.FC = () => {
             <TouchableOpacity
               style={styles.extendButton}
               onPress={() =>
-                router.push({pathname:"/screens/Lease/ExtendLease", params:{id: item?._id}})
+                router.push({
+                  pathname: "/screens/Lease/ExtendLease",
+                  params: { id: item?._id },
+                })
               }
             >
               <Text style={styles.extendText}>Extend Lease</Text>
             </TouchableOpacity>
           </View>
           <Text style={styles.leaseModel}>
-            {item?.carDetails?.[0]?.modelName}
+            {item?.carDetails?.[0]?.modelName?.charAt(0).toUpperCase() + item?.carDetails?.[0]?.modelName?.slice(1)}
           </Text>
 
           {item.countdown && (
             <View style={styles.timerContainer}>
               {[
-                { value: item.countdown.days, label: 'day' },
-                { value: item.countdown.hours, label: 'hr' },
-                { value: item.countdown.minutes, label: 'min' },
-                { value: item.countdown.seconds, label: 'sec' },
+                { value: item.countdown.days, label: "day" },
+                { value: item.countdown.hours, label: "hr" },
+                { value: item.countdown.minutes, label: "min" },
+                { value: item.countdown.seconds, label: "sec" },
               ].map((t, index) => (
                 <View key={index} style={styles.timerBlock}>
                   <Text style={styles.ti}>{t.value}</Text>
@@ -118,30 +124,30 @@ const AllLeases: React.FC = () => {
         </View>
       </Pressable>
     ),
-    [],
+    []
   );
 
   useFocusEffect(
     useCallback(() => {
       if (!isLoggedIn) {
-        router.push("/screens/Auth/SocialAuth")
+        router.push("/screens/Auth/SocialAuth");
         return;
       }
-    }, [isLoggedIn]),
+    }, [isLoggedIn])
   );
 
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#000" />
-        <Text style={styles.message}>Loading city car centers...</Text>
+        <ActivityIndicator size="large" color="#73C2FB" />
+        <Text style={styles.message}>Loading...</Text>
       </View>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      {Platform.OS === 'ios' && <View style={styles.statusBarBackground} />}
+      {Platform.OS === "ios" && <View style={styles.statusBarBackground} />}
       <StatusBar backgroundColor="transparent" barStyle="dark-content" />
 
       {LeasesCountDown?.length === 0 || !isLoggedIn ? (
@@ -153,7 +159,7 @@ const AllLeases: React.FC = () => {
           <Text style={styles.topText}>Car lease</Text>
           <Text style={styles.topDescription}>
             You have {Leases?.length} car
-            {LeasesCountDown?.length > 1 ? 's' : ''} at lease so far
+            {LeasesCountDown?.length > 1 ? "s" : ""} at lease so far
           </Text>
 
           <FlatList
@@ -176,132 +182,130 @@ export default AllLeases;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    marginBottom: 70,
+    backgroundColor: "#fff",
+    paddingTop: Platform.OS === 'android' ? 20 : 30
   },
   statusBarBackground: {
-    height: Platform.OS === 'ios' ? 44 : 0,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   contentContainer: {
     flex: 1,
     paddingHorizontal: 15,
-    paddingTop: 30,
   },
   topText: {
     fontSize: 24,
     marginBottom: 4,
-    fontFamily: 'bold',
-    color: '#1F305E',
+    fontFamily: "bold",
+    color: "#3f3f3fff",
   },
   topDescription: {
-    color: '#1F305E',
+    color: "#3f3f3fff",
     fontSize: 14,
-    marginBottom: 10,
-    fontFamily: 'demiBold',
+    marginBottom: 20,
+    fontFamily: "demiBold",
   },
   leaseCard: {
-    width: '100%',
-    backgroundColor: '#25262A',
+    width: "100%",
+    backgroundColor: "#25262A",
     borderRadius: 15,
     padding: 13,
-    marginBottom: 15,
+    marginBottom: 20,
   },
   cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   leaseTitle: {
-    color: '#fff',
-    fontWeight: '600',
+    color: "#fff",
+    fontWeight: "600",
     fontSize: 12,
-    fontFamily: 'demiBold',
+    fontFamily: "demiBold",
   },
   leaseModel: {
-    color: '#ccc',
+    color: "#ccc",
     fontSize: 12,
     marginTop: 16,
-    fontFamily: 'demiBold',
+    fontFamily: "demiBold",
   },
   extendButton: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 20,
   },
   extendText: {
-    fontWeight: '600',
+    fontWeight: "600",
     fontSize: 10,
-    fontFamily: 'demiBold',
-    color: '#1F305E',
+    fontFamily: "demiBold",
+    color: "#3f3f3fff",
   },
   timerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     marginTop: 8,
     paddingHorizontal: 10,
   },
   timerBlock: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   ti: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 30,
     marginTop: 10,
-    fontFamily: 'BebasNeue Regular',
+    fontFamily: "BebasNeue Regular",
   },
   timerLabel: {
     width: 30,
     fontSize: 11,
-    color: '#fff',
+    color: "#fff",
     marginTop: 4,
-    fontFamily: 'demiBold',
-    textAlign: 'center',
+    fontFamily: "demiBold",
+    textAlign: "center",
   },
   noLeaseContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 15,
   },
   noLeaseText: {
     fontSize: 18,
-    color: 'gray',
-    textAlign: 'center',
-    fontFamily: 'demiBold',
+    color: "gray",
+    textAlign: "center",
+    fontFamily: "demiBold",
   },
   centered: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   errorTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginTop: 10,
-    color: 'red',
-    fontFamily: 'bold',
+    color: "red",
+    fontFamily: "bold",
   },
   message: {
     fontSize: 14,
-    textAlign: 'center',
-    color: '#666',
+    textAlign: "center",
+    color: "#666",
     marginTop: 8,
-    fontFamily: 'medium',
+    fontFamily: "medium",
   },
   retryButton: {
     marginTop: 16,
-    backgroundColor: '#000',
+    backgroundColor: "#000",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 6,
   },
   retryText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontFamily: 'demiBold',
+    fontFamily: "demiBold",
   },
 });

@@ -95,7 +95,7 @@ const ReportIssueScreen: React.FC = () => {
           disabled={!isValid || isLoading}
         >
           {isLoading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="white" />
           ) : (
             <Text style={styles.buttonText}>Send</Text>
           )}
@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'android' ? 20 : 30
   },
   content: {
     paddingHorizontal: width * 0.05,
@@ -122,11 +123,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: RFValue(8),
     fontFamily: 'bold',
-    color: '#1F305E',
+    color: '#3f3f3fff',
   },
   subHeader: {
     fontSize: RFValue(13),
-    color: '#1F305E',
+    color: '#3f3f3fff',
     marginBottom: RFValue(20),
     fontFamily: 'medium',
   },
