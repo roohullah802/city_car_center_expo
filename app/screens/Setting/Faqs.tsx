@@ -6,10 +6,10 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  Platform
 } from 'react-native';
 import { useGetAllFaqsQuery } from '../../../redux.toolkit/rtk/apis';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { Platform } from 'react-native';
 
 interface FAQItem {
   question: string;

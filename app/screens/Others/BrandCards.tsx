@@ -8,13 +8,13 @@ import {
   TouchableOpacity,
   StatusBar,
   ActivityIndicator,
+  Platform
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context'
 import BrandCard from '../../../componentss/BrandCard';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useGetBrandsQuery } from '../../../redux.toolkit/rtk/apis';
 import { router } from 'expo-router';
-import { Platform } from 'react-native';
 
 const TopBrandsScreen: React.FC = () => {
   const [search, setSearch] = useState<string>('');
