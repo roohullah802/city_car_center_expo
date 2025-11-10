@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// src/screens/Settings/Settings.tsx
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,32 +8,50 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import LogoutModal from '../screens/Auth/Logout';
-import { RFValue } from 'react-native-responsive-fontsize';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../redux.toolkit/store';
-import { clearGuest } from '../../redux.toolkit/slices/userSlice';
-import { router } from 'expo-router';
+} from "react-native";
+import Icon from "react-native-vector-icons/Ionicons";
+import { SafeAreaView } from "react-native-safe-area-context";
+import LogoutModal from "../screens/Auth/Logout";
+import { RFValue } from "react-native-responsive-fontsize";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../redux.toolkit/store";
+import { clearGuest } from "../../redux.toolkit/slices/userSlice";
+import { router } from "expo-router";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 const Settings: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   const { userData, isLoggedIn } = useSelector(
-    (state: RootState) => state.user,
+    (state: RootState) => state.user
   );
   const dispatch = useDispatch();
 
-  const handleVisible = () => setIsVisible(prev => !prev);
+  const handleVisible = useCallback(() => setIsVisible((prev) => !prev), []);
 
   const avatarSource =
     isLoggedIn && userData?.profile
       ? { uri: userData.profile }
-      : require('../../assests/guest3.png');
+      : require("../../assests/guest3.png");
+
+  const handleNavigateBiometric = useCallback(() => {
+    router.push("/screens/Auth/BiometricScreen");
+  }, []);
+
+  const handleNavigateDocuments = useCallback(() => {
+    router.push("/screens/Setting/DocumentUploadScreen");
+  }, []);
+
+  // Badge Status
+  const statusConfig: Record<string, { label: string; color: string }> = {
+    verified: { label: "Verified", color: "#10B981" },
+    notVerified: { label: "Not Verified", color: "#F59E0B" },
+    rejected: { label: "Rejected", color: "#EF4444" },
+  };
+
+  const { label: badgeLabel, color: badgeColor } =
+    statusConfig[userData?.documentStatus ?? "notVerified"] ?? statusConfig.notVerified;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -40,23 +59,31 @@ const Settings: React.FC = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Header */}
         <Text style={styles.header}>Settings</Text>
 
         {/* Profile Card */}
         <View style={styles.profileCard}>
-          <Image
-            source={avatarSource}
-            style={styles.avatar}
-            resizeMode="cover"
-          />
+          <View>
+            <Image
+              source={avatarSource}
+              style={styles.avatar}
+              resizeMode="cover"
+            />
+
+            {isLoggedIn && (
+              <View style={[styles.badge, { backgroundColor: badgeColor }]}>
+                <Text style={styles.badgeText}>{badgeLabel}</Text>
+              </View>
+            )}
+          </View>
 
           <View style={styles.profileDetails}>
             <Text style={styles.name}>
               {userData?.name
                 ? userData.name.charAt(0).toUpperCase() + userData.name.slice(1)
-                : 'Guest'}
+                : "Guest"}
             </Text>
+
             {userData?.email && (
               <Text numberOfLines={1} ellipsizeMode="tail" style={styles.email}>
                 {userData.email}
@@ -68,17 +95,38 @@ const Settings: React.FC = () => {
             <TouchableOpacity
               style={styles.loginButton}
               onPress={() => {
-                router.push("/screens/Auth/SocialAuth")
-                dispatch(clearGuest())
+                router.push("/screens/Auth/SocialAuth");
+                dispatch(clearGuest());
               }}
               activeOpacity={0.7}
-              accessibilityLabel="Login"
             >
               <Text style={styles.login}>Login</Text>
               <Icon name="log-in-outline" size={26} color="#45B1E8" />
             </TouchableOpacity>
           )}
         </View>
+
+        {/* Documents */}
+        {isLoggedIn && (
+          <View style={styles.card}>
+            <SettingsRow
+              icon="folder-outline"
+              label="Documents"
+              onPress={handleNavigateDocuments}
+            />
+          </View>
+        )}
+
+        {/* Biometric Button */}
+        {isLoggedIn && (
+          <View style={styles.card}>
+            <SettingsRow
+              icon="finger-print-outline"
+              label="Biometric Login"
+              onPress={handleNavigateBiometric}
+            />
+          </View>
+        )}
 
         {/* History */}
         {isLoggedIn && (
@@ -126,7 +174,6 @@ const Settings: React.FC = () => {
         )}
       </ScrollView>
 
-      {/* Logout Confirmation Modal */}
       <LogoutModal visible={isVisible} onClose={() => setIsVisible(false)} />
     </SafeAreaView>
   );
@@ -139,12 +186,7 @@ type SettingsRowProps = {
 };
 
 const SettingsRow: React.FC<SettingsRowProps> = ({ icon, label, onPress }) => (
-  <TouchableOpacity
-    style={styles.row}
-    onPress={onPress}
-    activeOpacity={0.7}
-    accessibilityLabel={`Go to ${label}`}
-  >
+  <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.7}>
     <View style={styles.rowLeft}>
       <Icon name={icon} size={22} color="#444" />
       <Text style={styles.rowLabel} numberOfLines={1} ellipsizeMode="tail">
@@ -160,26 +202,24 @@ export default Settings;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: "#F9FAFB",
     paddingHorizontal: width * 0.05,
   },
-  scrollContent: {
-    paddingBottom: RFValue(40),
-  },
+  scrollContent: { paddingBottom: RFValue(40) },
   header: {
     fontSize: RFValue(20),
-    fontFamily: 'bold',
-    color: '#3f3f3fff',
+    fontFamily: "bold",
+    color: "#3f3f3fff",
     marginVertical: RFValue(16),
   },
   profileCard: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 12,
     padding: RFValue(14),
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: RFValue(20),
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.03,
     shadowRadius: 10,
     elevation: 3,
@@ -188,34 +228,39 @@ const styles = StyleSheet.create({
     width: RFValue(56),
     height: RFValue(56),
     borderRadius: RFValue(28),
-    marginRight: RFValue(12),
   },
-  profileDetails: {
-    flex: 1,
+
+  badge: {
+    position: "absolute",
+    bottom: -2,
+    right: -4,
+    paddingHorizontal: RFValue(6),
+    paddingVertical: RFValue(2),
+    borderRadius: 6,
   },
-  name: {
-    fontSize: RFValue(14),
-    fontFamily: 'bold',
-    color: 'black',
+  badgeText: {
+    color: "#fff",
+    fontSize: RFValue(5),
+    fontFamily: "bold",
   },
-  email: {
-    fontSize: RFValue(11),
-    color: '#6B7280',
-    fontFamily: 'demiBold',
-  },
+
+  profileDetails: { flex: 1, marginLeft: RFValue(12) },
+  name: { fontSize: RFValue(14), fontFamily: "bold", color: "black" },
+  email: { fontSize: RFValue(11), color: "#6B7280", fontFamily: "demiBold" },
+
   sectionTitle: {
     fontSize: RFValue(12),
-    color: '#9CA3AF',
+    color: "#9CA3AF",
     marginBottom: RFValue(6),
     marginTop: RFValue(12),
-    fontFamily: 'demiBold',
+    fontFamily: "demiBold",
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 12,
     paddingVertical: 1,
     marginBottom: RFValue(14),
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.02,
     shadowRadius: 8,
     elevation: 1,
@@ -223,31 +268,20 @@ const styles = StyleSheet.create({
   row: {
     paddingHorizontal: RFValue(14),
     paddingVertical: RFValue(14),
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottomColor: '#F3F4F6',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomColor: "#F3F4F6",
     borderBottomWidth: 1,
   },
-  rowLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
+  rowLeft: { flexDirection: "row", alignItems: "center", flex: 1 },
   rowLabel: {
     fontSize: RFValue(13),
-    color: 'black',
+    color: "black",
     marginLeft: RFValue(12),
     flexShrink: 1,
-    fontFamily: 'demiBold',
+    fontFamily: "demiBold",
   },
-  loginButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  login: {
-    fontFamily: 'bold',
-    color: '#45B1E8',
-    marginRight: RFValue(6),
-  },
+  loginButton: { flexDirection: "row", alignItems: "center" },
+  login: { fontFamily: "bold", color: "#45B1E8", marginRight: RFValue(6) },
 });

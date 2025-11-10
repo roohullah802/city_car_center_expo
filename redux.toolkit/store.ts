@@ -1,6 +1,7 @@
 // src/redux/store.ts
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import userReducer from './slices/userSlice';
+import securitySlice from './slices/securitySlice';
 import {Apis as appApis} from './rtk/apis'
 import {Apis as authApis} from './rtk/authApis'
 import {Apis as leaseApis} from './rtk/leaseApis'
@@ -19,6 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const rootReducer = combineReducers({
   user: userReducer,
+  security: securitySlice,
   [appApis.reducerPath]: appApis.reducer,
   [authApis.reducerPath]: authApis.reducer,
   [leaseApis.reducerPath]: leaseApis.reducer,
@@ -28,7 +30,7 @@ const rootReducer = combineReducers({
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['user'],
+  whitelist: ['user', 'security'],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

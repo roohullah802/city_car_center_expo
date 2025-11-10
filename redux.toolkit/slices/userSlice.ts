@@ -7,6 +7,7 @@ interface UserData {
   id: string;
   drivingLicence?: string;
   profile?: string;
+  documentStatus?: 'notVerified' | 'verified' | 'rejected';
 }
 
 interface FavCar {
