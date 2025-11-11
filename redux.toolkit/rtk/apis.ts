@@ -1,8 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { RootState } from '../store';
 
-
-
 export const Apis = createApi({
   reducerPath: 'cars',
    baseQuery: fetchBaseQuery({ 
@@ -39,9 +37,17 @@ export const Apis = createApi({
     getPolicy: builder.query({
       query: ()=> '/all/policy'
     }),
+    uploadDocuments: builder.mutation({
+      query: (formData: FormData)=>({
+        url:'/upload/documents',
+        method:'POST',
+        body: formData
+      })
+    })
+
 
   }),
 });
 
-export const { useGetCarsQuery, useGetBrandsQuery, useGetCarDetailsQuery, usePostReportIssueMutation, useGetAllFaqsQuery, useGetPolicyQuery } =
+export const { useGetCarsQuery, useGetBrandsQuery, useGetCarDetailsQuery, usePostReportIssueMutation, useGetAllFaqsQuery, useGetPolicyQuery, useUploadDocumentsMutation } =
   Apis;
