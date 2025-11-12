@@ -8,14 +8,21 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import { useStripe } from "@stripe/stripe-react-native";
 import { useCreatePaymentIntendMutation } from "../../../redux.toolkit/rtk/payment";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux.toolkit/store";
 import { showToast } from "../../../folder/toastService";
 import { router, useLocalSearchParams } from "expo-router";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { useDocumentStatusQuery } from "@/redux.toolkit/rtk/apis";
+import { useAuth } from "@clerk/clerk-expo";
 
 const DateAndTimeScreen: React.FC = () => {
   const { carId } = useLocalSearchParams<{ carId: string }>();
@@ -31,6 +38,8 @@ const DateAndTimeScreen: React.FC = () => {
   // Stripe
   const [createPaymentIntent] = useCreatePaymentIntendMutation();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const {isSignedIn} = useAuth();
+  const {refetch, isLoading: isLoadingStatus} = useDocumentStatusQuery({}, {skip: !isSignedIn});
 
   // Return date: 7 days after pick-up
   const returnDate = useMemo(() => {
@@ -41,23 +50,26 @@ const DateAndTimeScreen: React.FC = () => {
   }, [pickUpDate]);
 
   // Handle date change
-  const onChangeDate = useCallback((event: DateTimePickerEvent, selectedDate?: Date) => {
-    if (Platform.OS !== "ios") setShowDatePicker(false);
+  const onChangeDate = useCallback(
+    (event: DateTimePickerEvent, selectedDate?: Date) => {
+      if (Platform.OS !== "ios") setShowDatePicker(false);
 
-    let currentDate: Date | undefined;
+      let currentDate: Date | undefined;
 
-    if (Platform.OS === "ios") {
-      currentDate = selectedDate;
-    } else {
-      if (event.type === "set" && event.nativeEvent.timestamp) {
-        currentDate = new Date(event.nativeEvent.timestamp);
+      if (Platform.OS === "ios") {
+        currentDate = selectedDate;
+      } else {
+        if (event.type === "set" && event.nativeEvent.timestamp) {
+          currentDate = new Date(event.nativeEvent.timestamp);
+        }
       }
-    }
 
-    if (currentDate && !isNaN(currentDate.getTime())) {
-      setPickUpDate(currentDate);
-    }
-  }, []);
+      if (currentDate && !isNaN(currentDate.getTime())) {
+        setPickUpDate(currentDate);
+      }
+    },
+    []
+  );
 
   const formattedDate = (date: Date) => {
     if (!date || isNaN(date.getTime())) return "";
@@ -71,6 +83,12 @@ const DateAndTimeScreen: React.FC = () => {
   const handlePress = async () => {
     setLoading(true);
     try {
+      const docStatus = await refetch();
+      
+      if (docStatus.data.user.documentStatus === "notVerified") {
+        showToast("Please verify your documents to continue.");
+        return;
+      }
       const validCarId = carId.replace(/"/g, "");
       if (!isLoggedIn) {
         showToast("Please login first");
@@ -106,45 +124,54 @@ const DateAndTimeScreen: React.FC = () => {
 
   return (
     <SafeAreaView>
-      <ScrollView contentContainerStyle={{paddingTop:insets.top + 20, paddingBottom:insets.bottom + 20, padding:20}}>
-      <Text style={styles.title}>Select Rental Dates</Text>
-
-      {/* Pick-up Date */}
-      <TouchableOpacity style={styles.dateCard} onPress={() => setShowDatePicker(true)}>
-        <Text style={styles.dateLabel}>Pick-up Date</Text>
-        <Text style={styles.dateValue}>{formattedDate(pickUpDate)}</Text>
-      </TouchableOpacity>
-
-      {/* Return Date */}
-      <View style={[styles.dateCard, styles.returnDateCard]}>
-        <Text style={styles.dateLabel}>Return Date</Text>
-        <Text style={styles.dateValue}>{formattedDate(returnDate)}</Text>
-      </View>
-
-      {/* Date Picker */}
-      {showDatePicker && (
-        <DateTimePicker
-          value={pickUpDate || new Date()}
-          mode="date"
-          display="default"
-          minimumDate={new Date()}
-          onChange={onChangeDate}
-        />
-      )}
-
-      {/* Payment Button */}
-      <TouchableOpacity
-        style={[styles.payButton, loading && { opacity: 0.7 }]}
-        onPress={handlePress}
-        disabled={loading}
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: insets.top + 20,
+          paddingBottom: insets.bottom + 20,
+          padding: 20,
+        }}
       >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.payButtonText}>Continue</Text>
+        <Text style={styles.title}>Select Rental Dates</Text>
+
+        {/* Pick-up Date */}
+        <TouchableOpacity
+          style={styles.dateCard}
+          onPress={() => setShowDatePicker(true)}
+        >
+          <Text style={styles.dateLabel}>Pick-up Date</Text>
+          <Text style={styles.dateValue}>{formattedDate(pickUpDate)}</Text>
+        </TouchableOpacity>
+
+        {/* Return Date */}
+        <View style={[styles.dateCard, styles.returnDateCard]}>
+          <Text style={styles.dateLabel}>Return Date</Text>
+          <Text style={styles.dateValue}>{formattedDate(returnDate)}</Text>
+        </View>
+
+        {/* Date Picker */}
+        {showDatePicker && (
+          <DateTimePicker
+            value={pickUpDate || new Date()}
+            mode="date"
+            display="default"
+            minimumDate={new Date()}
+            onChange={onChangeDate}
+          />
         )}
-      </TouchableOpacity>
-    </ScrollView>
+
+        {/* Payment Button */}
+        <TouchableOpacity
+          style={[styles.payButton, loading && { opacity: 0.7 }]}
+          onPress={handlePress}
+          disabled={loading || isLoadingStatus}
+        >
+          {loading || isLoadingStatus ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.payButtonText}>Continue</Text>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -153,7 +180,7 @@ export default DateAndTimeScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flex:1,
+    flex: 1,
     padding: 20,
     backgroundColor: "#f9f9f9",
     paddingTop: Platform.OS === "android" ? 20 : 40,

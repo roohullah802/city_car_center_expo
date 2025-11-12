@@ -43,11 +43,13 @@ export const Apis = createApi({
         method:'POST',
         body: formData
       })
+    }),
+    documentStatus: builder.query({
+      query:()=> '/documents/status'
     })
-
 
   }),
 });
 
-export const { useGetCarsQuery, useGetBrandsQuery, useGetCarDetailsQuery, usePostReportIssueMutation, useGetAllFaqsQuery, useGetPolicyQuery, useUploadDocumentsMutation } =
+export const { useGetCarsQuery, useGetBrandsQuery, useGetCarDetailsQuery, usePostReportIssueMutation, useGetAllFaqsQuery, useGetPolicyQuery, useUploadDocumentsMutation, useDocumentStatusQuery } =
   Apis;

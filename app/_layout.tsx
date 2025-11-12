@@ -1,6 +1,6 @@
 import { SplashScreen, Stack } from "expo-router";
 import { Provider, useSelector } from "react-redux";
-import { store, RootState } from "../redux.toolkit/store";
+import { store, RootState, persistor } from "../redux.toolkit/store";
 import "react-native-reanimated";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ClerkProvider } from "@clerk/clerk-expo";
@@ -12,6 +12,7 @@ import { StripeProvider } from "@stripe/stripe-react-native";
 import { tokenCache } from "@/folder/tokenCache";
 import * as LocalAuthentication from "expo-local-authentication";
 import { View, Text, ActivityIndicator, StyleSheet, StatusBar } from "react-native";
+import { PersistGate } from "redux-persist/integration/react";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -45,13 +46,15 @@ export default function RootLayout() {
         publishableKey="pk_test_Ym9sZC1kdWNrbGluZy03MC5jbGVyay5hY2NvdW50cy5kZXYk"
       >
         <Provider store={store}>
-          <ClerkTokenProvider>
+         <PersistGate loading={null} persistor={persistor}>
+           <ClerkTokenProvider>
             <ToastProvider>
               <StripeProvider publishableKey="pk_test_51Re3kqIetrHxrdQ8R3S84zr8YR1OMwqW3KNjGQGWB4hUCyINYxNJfSrfD9llu98yQMHRDobHBj1j9GMUBTpfXhgk00ZET6yOby">
                 <MainLayoutWithBiometric />
               </StripeProvider>
             </ToastProvider>
           </ClerkTokenProvider>
+         </PersistGate>
         </Provider>
       </ClerkProvider>
     </GestureHandlerRootView>

@@ -12,11 +12,9 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { usePaymentIntentForExtendLeaseMutation } from '../../../redux.toolkit/rtk/payment';
-import {
-  initPaymentSheet,
-  presentPaymentSheet,
-} from '@stripe/stripe-react-native';
+import { useStripe } from '@stripe/stripe-react-native';
 import { router, useLocalSearchParams } from 'expo-router';
+import { showToast } from '@/folder/toastService';
 
 type RateOption = {
   label: string;
@@ -33,6 +31,8 @@ const ExtendLeaseScreen: React.FC = () => {
 
   const [paymentIntentForExtendLease] =
     usePaymentIntentForExtendLeaseMutation();
+
+    const {initPaymentSheet, presentPaymentSheet} = useStripe();
 
   const rateOptions: RateOption[] = useMemo(
     () => [
@@ -62,6 +62,8 @@ const ExtendLeaseScreen: React.FC = () => {
     const days = Number(manualDays);
     setIsLoading(true);
     try {
+      console.log(id);
+      
       const response = await paymentIntentForExtendLease({
         id: id,
         additionalDays: days,
@@ -81,10 +83,13 @@ const ExtendLeaseScreen: React.FC = () => {
       if (presentError) throw presentError;
       router.push("/screens/Payments/PaymentSuccess")
     } catch (error: any) {
+      console.log(error);
+      showToast(error?.data?.message || error?.message)
+      
     } finally {
       setIsLoading(false);
     }
-  }, [manualDays, id, paymentIntentForExtendLease]);
+  }, [manualDays, id, paymentIntentForExtendLease,initPaymentSheet, presentPaymentSheet]);
 
   return (
     <KeyboardAvoidingView

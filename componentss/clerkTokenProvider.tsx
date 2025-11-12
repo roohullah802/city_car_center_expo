@@ -7,7 +7,7 @@ import {
   setUserData,
   clearUserData,
 } from "../redux.toolkit/slices/userSlice";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 export default function ClerkTokenProvider({
   children,
@@ -17,6 +17,7 @@ export default function ClerkTokenProvider({
   const dispatch = useDispatch();
   const { getToken, isSignedIn } = useAuth();
   const { user, isLoaded: userLoaded } = useUser();
+
 
   useEffect(() => {
     let interval: any;
@@ -33,8 +34,7 @@ export default function ClerkTokenProvider({
 
         if (freshToken) {
           dispatch(setToken(freshToken));
-          dispatch(setLoggedIn(true)); 
-          await AsyncStorage.setItem("token", freshToken);
+          dispatch(setLoggedIn(true));
         }
 
         if (userLoaded && user) {
@@ -57,7 +57,7 @@ export default function ClerkTokenProvider({
     interval = setInterval(fetchAndStore, 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [isSignedIn, userLoaded, user, getToken, dispatch]);
+  }, [isSignedIn, userLoaded, dispatch,getToken,user]);
 
   return <>{children}</>;
 }

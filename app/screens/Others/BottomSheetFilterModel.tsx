@@ -13,6 +13,7 @@ import { useGetBrandsQuery } from '../../../redux.toolkit/rtk/apis';
 
 
 
+
 interface FilterModalProps {
   onClose: () => void;
   priceRange: [number, number];

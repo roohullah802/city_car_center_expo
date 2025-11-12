@@ -12,7 +12,8 @@ import Icon from "react-native-vector-icons/Ionicons";
 import { useUploadDocumentsMutation } from "@/redux.toolkit/rtk/apis";
 import { showToast } from "@/folder/toastService";
 import { router } from "expo-router";
-import { TextInput } from "react-native-gesture-handler";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 
 type DocKey = "cnicFront" | "cnicBack" | "drivingLicence" | "extraDocuments";
 
@@ -37,6 +38,7 @@ const DocumentUploadScreen: React.FC = () => {
     drivingLicence: null,
     extraDocuments: [],
   });
+  const insets = useSafeAreaInsets();
 
   const [uploadDocuments, { isLoading }] = useUploadDocumentsMutation();
 
@@ -97,7 +99,6 @@ const DocumentUploadScreen: React.FC = () => {
     });
 
     try {
-      console.log(formData);
       
       await uploadDocuments(formData).unwrap();
       showToast("Uploaded successfully");
@@ -109,7 +110,7 @@ const DocumentUploadScreen: React.FC = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, {paddingTop: insets.top + 20}]}>
       <Text style={styles.title}>Upload Required Documents</Text>
       <Text style={styles.subtitle}>
         Please upload your documents to verify your identity.

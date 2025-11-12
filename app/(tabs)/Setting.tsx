@@ -1,5 +1,5 @@
 // src/screens/Settings/Settings.tsx
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -17,16 +18,20 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux.toolkit/store";
 import { clearGuest } from "../../redux.toolkit/slices/userSlice";
 import { router } from "expo-router";
+import { useDocumentStatusQuery } from "@/redux.toolkit/rtk/apis";
+import { useAuth } from "@clerk/clerk-expo";
 
 const { width } = Dimensions.get("window");
 
 const Settings: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
-
-  const { userData, isLoggedIn } = useSelector(
-    (state: RootState) => state.user
-  );
+  const [cachedStatus, setCachedStatus] = useState<string | null>(null);
+  const [loadingStatus, setLoadingStatus] = useState(true);
+  const {isSignedIn} = useAuth()
+  const { userData, isLoggedIn } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
+
+  const {refetch} = useDocumentStatusQuery({}, {skip: !isSignedIn});
 
   const handleVisible = useCallback(() => setIsVisible((prev) => !prev), []);
 
@@ -43,15 +48,40 @@ const Settings: React.FC = () => {
     router.push("/screens/Setting/DocumentUploadScreen");
   }, []);
 
-  // Badge Status
+  useEffect(() => {
+    (async () => {
+      try {
+        const storedStatus = await refetch()
+        if (storedStatus) {
+          setCachedStatus(storedStatus.data.user.documentStatus);
+        }
+      } catch (error) {
+        console.error("Error loading cached documentStatus:", error);
+      } finally {
+        setLoadingStatus(false);
+      }
+    })();
+  }, [refetch]);
+
+
   const statusConfig: Record<string, { label: string; color: string }> = {
     verified: { label: "Verified", color: "#10B981" },
     notVerified: { label: "Not Verified", color: "#F59E0B" },
     rejected: { label: "Rejected", color: "#EF4444" },
   };
 
+  const currentStatus =  cachedStatus || "notVerified";
+
   const { label: badgeLabel, color: badgeColor } =
-    statusConfig[userData?.documentStatus ?? "notVerified"] ?? statusConfig.notVerified;
+    statusConfig[currentStatus] ?? statusConfig.notVerified;
+
+  if (loadingStatus) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#45B1E8" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -69,7 +99,6 @@ const Settings: React.FC = () => {
               style={styles.avatar}
               resizeMode="cover"
             />
-
             {isLoggedIn && (
               <View style={[styles.badge, { backgroundColor: badgeColor }]}>
                 <Text style={styles.badgeText}>{badgeLabel}</Text>
@@ -212,6 +241,12 @@ const styles = StyleSheet.create({
     color: "#3f3f3fff",
     marginVertical: RFValue(16),
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB",
+  },
   profileCard: {
     backgroundColor: "#fff",
     borderRadius: 12,
@@ -229,7 +264,6 @@ const styles = StyleSheet.create({
     height: RFValue(56),
     borderRadius: RFValue(28),
   },
-
   badge: {
     position: "absolute",
     bottom: -2,
@@ -243,11 +277,9 @@ const styles = StyleSheet.create({
     fontSize: RFValue(5),
     fontFamily: "bold",
   },
-
   profileDetails: { flex: 1, marginLeft: RFValue(12) },
   name: { fontSize: RFValue(14), fontFamily: "bold", color: "black" },
   email: { fontSize: RFValue(11), color: "#6B7280", fontFamily: "demiBold" },
-
   sectionTitle: {
     fontSize: RFValue(12),
     color: "#9CA3AF",

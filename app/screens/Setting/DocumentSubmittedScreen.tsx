@@ -20,7 +20,13 @@ const DocumentsSubmittedScreen: React.FC = () => {
           style={styles.image}
           resizeMode="contain"
         />
-        <Text style={styles.title}>Documents Submitted!</Text>
+
+        {/* Center Title */}
+        <Text style={styles.title}>
+          Documents Submitted!
+        </Text>
+
+        {/* Center Message */}
         <Text style={styles.message}>
           Your documents have been uploaded successfully and are waiting for admin approval.
         </Text>
@@ -64,6 +70,7 @@ const styles = StyleSheet.create({
     fontFamily: 'bold',
     color: '#10B981',
     marginBottom: RFValue(10),
+    textAlign: 'center',
   },
   message: {
     fontSize: RFValue(14),
@@ -71,6 +78,7 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'center',
     marginBottom: RFValue(20),
+    width: '90%',
   },
   button: {
     backgroundColor: '#45B1E8',

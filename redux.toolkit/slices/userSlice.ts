@@ -1,5 +1,5 @@
 // src/redux/slices/userSlice.ts
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface UserData {
   name: string;
@@ -7,7 +7,7 @@ interface UserData {
   id: string;
   drivingLicence?: string;
   profile?: string;
-  documentStatus?: 'notVerified' | 'verified' | 'rejected';
+  documentStatus?: string;
 }
 
 interface FavCar {
@@ -57,7 +57,7 @@ const initialState: UserState = {
 };
 
 const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
     setLoading(state, action: PayloadAction<boolean>) {
@@ -75,10 +75,14 @@ const userSlice = createSlice({
     clearToken(state) {
       state.token = null;
     },
+    setStatus: (state, action) => {
+      if (!state.userData) return
+      state.userData.documentStatus = action.payload;
+    },
 
     setDrivingLicense(
       state,
-      action: PayloadAction<{ drivingLicence: string }>,
+      action: PayloadAction<{ drivingLicence: string }>
     ) {
       if (state.userData) {
         state.userData = {
@@ -103,13 +107,13 @@ const userSlice = createSlice({
     setLoggedIn(state, action: PayloadAction<boolean>) {
       state.isLoggedIn = action.payload;
     },
-    clearGuest(state){
-      state.isGuest = false
-      state.userData = null
+    clearGuest(state) {
+      state.isGuest = false;
+      state.userData = null;
     },
     removeFavCar(state, action: PayloadAction<string>) {
       state.favouriteCars = state.favouriteCars.filter(
-        item => item._id !== action.payload,
+        (item) => item._id !== action.payload
       );
     },
 
@@ -120,7 +124,7 @@ const userSlice = createSlice({
     addFavCar(state, action: PayloadAction<FavCar>) {
       const car = action.payload;
       if (!state.favouriteCars) state.favouriteCars = []; // ensure array
-      const existCar = state.favouriteCars.find(item => item._id === car._id);
+      const existCar = state.favouriteCars.find((item) => item._id === car._id);
       if (!existCar) {
         state.favouriteCars.push(car);
       }
@@ -140,7 +144,8 @@ export const {
   setToken,
   clearToken,
   continueAsGuest,
-  clearGuest
+  clearGuest,
+  setStatus
 } = userSlice.actions;
 
 export default userSlice.reducer;
