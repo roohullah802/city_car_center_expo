@@ -8,40 +8,48 @@
     "scheme": "citycarcenterexpo",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./assets/icon.png", 
+      "backgroundColor": "#FFFFFF"
     },
+
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundImage": "./assets/adaptive-icon.png"
+        "backgroundColor": "#FFFFFF"
       },
       "package": "com.roohullah1.city_car_center_expo"
     },
+
     "web": {
       "output": "static",
       "favicon": "./assets/icon.png"
     },
+
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
           "image": "./assets/splash.png",
-          "imageWidth": 200,
+          "imageWidth": 500,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#FFFFFF",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#FFFFFF",
+            "image": "./assets/splash.png"
           }
         }
       ]
     ],
+
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
     },
+
     "extra": {
       "router": {},
       "eas": {

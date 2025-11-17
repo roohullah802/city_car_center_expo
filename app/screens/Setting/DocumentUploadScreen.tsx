@@ -12,8 +12,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 import { useUploadDocumentsMutation } from "@/redux.toolkit/rtk/apis";
 import { showToast } from "@/folder/toastService";
 import { router } from "expo-router";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type DocKey = "cnicFront" | "cnicBack" | "drivingLicence" | "extraDocuments";
 
@@ -38,14 +37,17 @@ const DocumentUploadScreen: React.FC = () => {
     drivingLicence: null,
     extraDocuments: [],
   });
-  const insets = useSafeAreaInsets();
 
+  const insets = useSafeAreaInsets();
   const [uploadDocuments, { isLoading }] = useUploadDocumentsMutation();
 
-  const pickDocument = useCallback(async (key: DocKey) => {
+  // ---------------------------
+  // PICK FROM GALLERY
+  // ---------------------------
+  const pickFromGallery = useCallback(async (key: DocKey) => {
     const res = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
-      mediaTypes: ["images"],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.7,
     });
 
@@ -61,56 +63,90 @@ const DocumentUploadScreen: React.FC = () => {
     }
   }, []);
 
+  // ---------------------------
+  // PICK FROM CAMERA
+  // ---------------------------
+  const pickFromCamera = useCallback(async (key: DocKey) => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      showToast("Camera permission is required.");
+      return;
+    }
+
+    const res = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 0.7,
+    });
+
+    if (!res.canceled) {
+      const uri = res.assets[0].uri;
+      setDocs((prev) => {
+        if (key === "extraDocuments") {
+          return { ...prev, extraDocuments: [...prev.extraDocuments, uri] };
+        } else {
+          return { ...prev, [key]: uri };
+        }
+      });
+    }
+  }, []);
+
+  // ---------------------------
+  // CONTINUE BUTTON CHECK
+  // ---------------------------
   const canContinue = useMemo(
     () => docs.cnicFront && docs.cnicBack && docs.drivingLicence,
     [docs]
   );
 
+  // ---------------------------
+  // HANDLE SUBMIT
+  // ---------------------------
   const handleSubmit = async () => {
     const formData = new FormData();
 
-    if (docs.cnicFront) {
+    if (docs.cnicFront)
       formData.append("cnicFront", {
         uri: docs.cnicFront,
         type: "image/jpeg",
         name: "cnicFront.jpg",
       } as any);
-    }
-    if (docs.cnicBack) {
+
+    if (docs.cnicBack)
       formData.append("cnicBack", {
         uri: docs.cnicBack,
         type: "image/jpeg",
         name: "cnicBack.jpg",
       } as any);
-    }
-    if (docs.drivingLicence) {
+
+    if (docs.drivingLicence)
       formData.append("drivingLicence", {
         uri: docs.drivingLicence,
         type: "image/jpeg",
         name: "drivingLicence.jpg",
       } as any);
-    }
-    docs.extraDocuments.forEach((uri, index) => {
+
+    docs.extraDocuments.forEach((uri, index) =>
       formData.append("extraDocuments", {
         uri,
         type: "image/jpeg",
         name: `extra-${index}.jpg`,
-      } as any);
-    });
+      } as any)
+    );
 
     try {
-      
       await uploadDocuments(formData).unwrap();
-      showToast("Uploaded successfully");
+      showToast("Uploaded successfully!");
       router.push("/screens/Setting/DocumentSubmittedScreen");
-    } catch (e) {
-      console.error("Upload failed", e);
-      showToast("Oops! Upload documents failed!");
+    } catch (err) {
+      console.error("Upload failed", err);
+      showToast("Oops! Upload failed");
     }
   };
 
   return (
-    <ScrollView contentContainerStyle={[styles.container, {paddingTop: insets.top + 20}]}>
+    <ScrollView
+      contentContainerStyle={[styles.container, { paddingTop: insets.top + 20 }]}
+    >
       <Text style={styles.title}>Upload Required Documents</Text>
       <Text style={styles.subtitle}>
         Please upload your documents to verify your identity.
@@ -122,6 +158,7 @@ const DocumentUploadScreen: React.FC = () => {
             {doc.label} {doc.required && <Text style={{ color: "red" }}>*</Text>}
           </Text>
 
+          {/* PREVIEW */}
           {doc.key === "extraDocuments" ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {docs.extraDocuments.map((file, i) => (
@@ -132,7 +169,9 @@ const DocumentUploadScreen: React.FC = () => {
                     onPress={() =>
                       setDocs((prev) => ({
                         ...prev,
-                        extraDocuments: prev.extraDocuments.filter((_, index) => index !== i),
+                        extraDocuments: prev.extraDocuments.filter(
+                          (_, index) => index !== i
+                        ),
                       }))
                     }
                   >
@@ -157,24 +196,39 @@ const DocumentUploadScreen: React.FC = () => {
             </View>
           )}
 
-          <TouchableOpacity
-            style={styles.uploadBtn}
-            onPress={() => pickDocument(doc.key)}
-          >
-            <Icon name="cloud-upload-outline" size={22} color="#fff" />
-            <Text style={styles.uploadText}>
-              {doc.key === "extraDocuments" ? "Add File" : "Upload"}
-            </Text>
-          </TouchableOpacity>
+          {/* Upload Buttons */}
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={styles.uploadBtn}
+              onPress={() => pickFromGallery(doc.key)}
+            >
+              <Icon name="images-outline" size={20} color="#fff" />
+              <Text style={styles.uploadText}>Upload</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.uploadBtn, styles.cameraBtn]}
+              onPress={() => pickFromCamera(doc.key)}
+            >
+              <Icon name="camera-outline" size={20} color="#fff" />
+              <Text style={styles.uploadText}>Camera</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       ))}
 
+      {/* Continue Button */}
       <TouchableOpacity
         disabled={!canContinue || isLoading}
         onPress={handleSubmit}
-        style={[styles.continueBtn, (!canContinue || isLoading) && { backgroundColor: "#ccc" }]}
+        style={[
+          styles.continueBtn,
+          (!canContinue || isLoading) && { backgroundColor: "#ccc" },
+        ]}
       >
-        <Text style={styles.continueText}>{isLoading ? "Uploading..." : "Continue"}</Text>
+        <Text style={styles.continueText}>
+          {isLoading ? "Uploading..." : "Continue"}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -186,15 +240,75 @@ const styles = StyleSheet.create({
   container: { padding: 20, paddingBottom: 70 },
   title: { fontSize: 22, fontWeight: "bold", color: "#222" },
   subtitle: { fontSize: 14, marginTop: 8, marginBottom: 20, color: "#666" },
-  card: { backgroundColor: "#fff", padding: 14, borderRadius: 12, marginBottom: 18, elevation: 2 },
+  card: {
+    backgroundColor: "#fff",
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 18,
+    elevation: 2,
+  },
   label: { fontSize: 15, fontWeight: "600", marginBottom: 10, color: "#333" },
   preview: { width: "100%", height: 160, borderRadius: 10, marginBottom: 10 },
-  previewSmall: { width: 80, height: 80, borderRadius: 8, marginRight: 10, backgroundColor: "#eee" },
-  removeSmallBtn: { position: "absolute", top: -6, right: -6, backgroundColor: "rgba(255,0,0,0.8)", borderRadius: 20, padding: 3 },
-  placeholder: { width: "100%", height: 160, borderRadius: 10, backgroundColor: "#f0f0f0", justifyContent: "center", alignItems: "center", marginBottom: 10 },
-  uploadBtn: { flexDirection: "row", alignItems: "center", backgroundColor: "#45B1E8", paddingHorizontal: 14, paddingVertical: 10, borderRadius: 8, marginTop: 5 },
-  uploadText: { color: "#fff", marginLeft: 8, fontSize: 14, fontWeight: "600" },
-  removeBtn: { position: "absolute", top: 10, right: 10, backgroundColor: "#fff", padding: 6, borderRadius: 20 },
-  continueBtn: { backgroundColor: "#45B1E8", paddingVertical: 14, borderRadius: 10, marginTop: 10 },
-  continueText: { color: "#fff", textAlign: "center", fontSize: 16, fontWeight: "700" },
+  previewSmall: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 10,
+    backgroundColor: "#eee",
+  },
+  removeSmallBtn: {
+    position: "absolute",
+    top: -6,
+    right: -6,
+    backgroundColor: "rgba(255,0,0,0.8)",
+    borderRadius: 20,
+    padding: 3,
+  },
+  placeholder: {
+    width: "100%",
+    height: 160,
+    borderRadius: 10,
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+
+  // Upload Buttons
+  buttonRow: { flexDirection: "row", gap: 10 },
+  uploadBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#45B1E8",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 8,
+    flex: 1,
+    justifyContent: "center",
+  },
+  cameraBtn: {
+    backgroundColor: "#0C8CE9",
+  },
+  uploadText: { color: "#fff", marginLeft: 6, fontSize: 14, fontWeight: "600" },
+
+  removeBtn: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "#fff",
+    padding: 6,
+    borderRadius: 20,
+  },
+  continueBtn: {
+    backgroundColor: "#45B1E8",
+    paddingVertical: 14,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  continueText: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "700",
+  },
 });
